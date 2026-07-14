@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Software</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@300;400;500;600&family=Orbitron:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --carbon: #0a0a0f;
+  --graphite: #1a1a2e;
+  --steel: #16213e;
+  --ember: #e94560;
+  --gold: #f5a623;
+  --silver: #c0c0d0;
+  --glow: #00d4ff;
+  --green: #00e676;
+  --text: #e8e8f0;
+  --muted: #8888a0;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Rajdhani',sans-serif; background:var(--carbon); color:var(--text); min-height:100vh; overflow-x:hidden; }
+body::before { content:''; position:fixed; top:0;left:0;right:0;bottom:0; background:radial-gradient(ellipse at 20% 20%,rgba(233,69,96,.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(0,212,255,.06) 0%,transparent 50%); pointer-events:none; z-index:0; }
+body::after { content:''; position:fixed; top:0;left:0;right:0;bottom:0; background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; z-index:0; }
+
+/* SIDEBAR */
+.sidebar { position:fixed; left:0;top:0;bottom:0; width:260px; background:linear-gradient(180deg,#0f0f1a 0%,#0a0a12 100%); border-right:1px solid var(--border); z-index:100; display:flex; flex-direction:column; overflow-y:auto; }
+.sidebar::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; background:linear-gradient(180deg,var(--ember),var(--gold),var(--glow)); }
+.logo-area { padding:24px 20px; border-bottom:1px solid var(--border); }
+.logo-top { font-family:'Orbitron',monospace; font-size:13px; font-weight:900; color:var(--ember); letter-spacing:3px; }
+.logo-sub { font-size:11px; color:var(--gold); margin-top:2px; letter-spacing:1px; font-weight:600; }
+.logo-full { font-size:10px; color:var(--muted); margin-top:6px; line-height:1.4; font-family:'Noto Sans Devanagari',sans-serif; }
+.hr-badge { margin-top:10px; display:inline-block; background:linear-gradient(135deg,var(--ember),#c0392b); color:white; font-size:9px; font-weight:700; padding:3px 10px; border-radius:20px; letter-spacing:2px; }
+.nav-section { padding:8px 0; border-bottom:1px solid var(--border); }
+.nav-label { font-size:9px; letter-spacing:3px; color:var(--muted); padding:8px 20px 4px; text-transform:uppercase; font-weight:700; }
+.nav-item { display:flex; align-items:center; gap:12px; padding:11px 20px; cursor:pointer; transition:all .2s; border-left:3px solid transparent; }
+.nav-item:hover,.nav-item.active { background:rgba(233,69,96,.1); border-left-color:var(--ember); }
+.nav-item.active .nav-icon { color:var(--ember); }
+.nav-item:hover .nav-icon { color:var(--gold); }
+.nav-icon { font-size:18px; width:22px; text-align:center; color:var(--muted); transition:color .2s; }
+.nav-text { font-size:14px; font-weight:600; color:var(--text); flex:1; }
+.nav-badge { background:var(--ember); color:white; font-size:10px; font-weight:700; padding:2px 7px; border-radius:10px; }
+.sidebar-footer { margin-top:auto; padding:16px 20px; border-top:1px solid var(--border); font-size:11px; color:var(--muted); text-align:center; }
+
+/* MAIN */
+.main { margin-left:260px; min-height:100vh; position:relative; z-index:1; }
+.topbar { position:sticky; top:0; background:rgba(10,10,15,.95); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); padding:0 32px; height:64px; display:flex; align-items:center; justify-content:space-between; z-index:50; }
+.page-title { font-family:'Orbitron',monospace; font-size:16px; font-weight:700; color:var(--text); letter-spacing:2px; }
+.page-subtitle { font-size:12px; color:var(--muted); margin-top:2px; }
+.topbar-right { display:flex; align-items:center; gap:16px; }
+.stat-pill { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:6px 14px; font-size:12px; font-weight:600; }
+
+/* CONTENT */
+.content { padding:32px; }
+.section { display:none; }
+.section.active { display:block; }
+
+/* CARDS */
+.card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; }
+.card-title { font-size:13px; font-weight:700; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:16px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+
+/* STAT CARDS */
+.stat-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:20px; position:relative; overflow:hidden; }
+.stat-card::before { content:''; position:absolute; top:0;left:0;right:0; height:2px; }
+.stat-card.red::before { background:var(--ember); }
+.stat-card.gold::before { background:var(--gold); }
+.stat-card.green::before { background:var(--green); }
+.stat-card.blue::before { background:var(--glow); }
+.stat-value { font-family:'Orbitron',monospace; font-size:28px; font-weight:700; }
+.stat-label { font-size:12px; color:var(--muted); margin-top:4px; }
+.stat-icon { position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:32px; opacity:.3; }
+
+/* TABLE */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; }
+th { text-align:left; padding:10px 14px; font-size:11px; font-weight:700; letter-spacing:2px; color:var(--muted); text-transform:uppercase; border-bottom:1px solid var(--border); }
+td { padding:12px 14px; font-size:14px; border-bottom:1px solid rgba(255,255,255,.04); vertical-align:middle; }
+tr:hover td { background:rgba(255,255,255,.03); }
+.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+.badge-green { background:rgba(0,230,118,.15); color:var(--green); }
+.badge-red { background:rgba(233,69,96,.15); color:var(--ember); }
+.badge-gold { background:rgba(245,166,35,.15); color:var(--gold); }
+.badge-blue { background:rgba(0,212,255,.15); color:var(--glow); }
+
+/* BUTTONS */
+.btn { display:inline-flex; align-items:center; gap:6px; padding:9px 18px; border-radius:8px; font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:700; cursor:pointer; border:none; transition:all .2s; letter-spacing:.5px; }
+.btn-primary { background:linear-gradient(135deg,var(--ember),#c0392b); color:white; }
+.btn-primary:hover { transform:translateY(-1px); box-shadow:0 4px 15px rgba(233,69,96,.4); }
+.btn-gold { background:linear-gradient(135deg,var(--gold),#e67e22); color:#000; }
+.btn-gold:hover { transform:translateY(-1px); box-shadow:0 4px 15px rgba(245,166,35,.4); }
+.btn-green { background:linear-gradient(135deg,var(--green),#00b248); color:#000; }
+.btn-blue { background:linear-gradient(135deg,var(--glow),#0099cc); color:#000; }
+.btn-secondary { background:var(--card); border:1px solid var(--border); color:var(--text); }
+.btn-secondary:hover { background:rgba(255,255,255,.08); }
+.btn-sm { padding:6px 12px; font-size:12px; }
+.btn-danger { background:rgba(233,69,96,.15); border:1px solid var(--ember); color:var(--ember); }
+
+/* FORMS */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.form-group { display:flex; flex-direction:column; gap:6px; }
+.form-group.full { grid-column:1/-1; }
+.form-label { font-size:12px; font-weight:700; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+.form-input { background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:var(--text); font-family:'Rajdhani',sans-serif; font-size:14px; transition:border .2s; }
+.form-input:focus { outline:none; border-color:var(--ember); }
+.form-input option { background:#1a1a2e; }
+select.form-input { cursor:pointer; }
+
+/* MODAL */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:200; display:none; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+.modal-overlay.open { display:flex; }
+.modal { background:#12121f; border:1px solid var(--border); border-radius:16px; width:600px; max-width:95vw; max-height:90vh; overflow-y:auto; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--border); }
+.modal-title { font-size:16px; font-weight:700; }
+.modal-close { background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; padding:4px 8px; border-radius:6px; }
+.modal-close:hover { background:rgba(255,255,255,.08); color:var(--text); }
+.modal-body { padding:24px; }
+.modal-footer { display:flex; gap:12px; justify-content:flex-end; padding:16px 24px; border-top:1px solid var(--border); }
+
+/* TOAST */
+.toast { position:fixed; bottom:30px; right:30px; background:#1a1a2e; border:1px solid var(--ember); border-radius:10px; padding:14px 20px; font-size:14px; font-weight:600; z-index:999; transform:translateY(80px); opacity:0; transition:all .3s; max-width:350px; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.error { border-color:var(--ember); color:var(--ember); }
+.toast.success { border-color:var(--green); color:var(--green); }
+
+/* SEARCH BAR */
+.search-bar { display:flex; gap:12px; margin-bottom:20px; align-items:center; flex-wrap:wrap; }
+.search-input { flex:1; min-width:200px; background:rgba(255,255,255,.06); border:1px solid var(--border); border-radius:8px; padding:10px 14px; color:var(--text); font-family:'Rajdhani',sans-serif; font-size:14px; }
+.search-input:focus { outline:none; border-color:var(--ember); }
+
+/* ATTENDANCE GRID */
+.att-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; }
+.att-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:8px; }
+.att-name { font-size:13px; font-weight:700; }
+.att-id { font-size:11px; color:var(--muted); }
+.att-btns { display:flex; gap:6px; }
+.att-btn { flex:1; padding:6px; border:none; border-radius:6px; font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all .2s; }
+.att-btn.present { background:rgba(0,230,118,.2); color:var(--green); border:1px solid rgba(0,230,118,.3); }
+.att-btn.present.active, .att-btn.present:hover { background:var(--green); color:#000; }
+.att-btn.absent { background:rgba(233,69,96,.2); color:var(--ember); border:1px solid rgba(233,69,96,.3); }
+.att-btn.absent.active, .att-btn.absent:hover { background:var(--ember); color:white; }
+.att-btn.halfday { background:rgba(245,166,35,.2); color:var(--gold); border:1px solid rgba(245,166,35,.3); }
+.att-btn.halfday.active, .att-btn.halfday:hover { background:var(--gold); color:#000; }
+
+/* PAYROLL */
+.pay-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px; }
+.pay-row:last-child { border-bottom:none; font-weight:700; font-size:16px; color:var(--green); }
+.pay-label { color:var(--muted); }
+
+/* PROGRESS */
+.progress-bar { background:rgba(255,255,255,.08); border-radius:10px; height:6px; overflow:hidden; }
+.progress-fill { height:100%; border-radius:10px; transition:width .6s; }
+
+/* LEAVE BALANCE */
+.leave-bal { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+.leave-type-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 18px; min-width:130px; }
+.leave-type-name { font-size:11px; color:var(--muted); font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+.leave-type-count { font-family:'Orbitron',monospace; font-size:24px; font-weight:700; color:var(--glow); margin-top:4px; }
+.leave-type-total { font-size:11px; color:var(--muted); }
+
+/* TABS */
+.tabs { display:flex; gap:4px; margin-bottom:20px; background:rgba(255,255,255,.04); border-radius:10px; padding:4px; width:fit-content; }
+.tab { padding:8px 18px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; color:var(--muted); }
+.tab.active { background:var(--ember); color:white; }
+
+/* CHART BARS */
+.chart-bar-wrap { display:flex; flex-direction:column; gap:10px; }
+.chart-bar-row { display:flex; align-items:center; gap:12px; }
+.chart-bar-label { width:80px; font-size:12px; color:var(--muted); text-align:right; }
+.chart-bar-bg { flex:1; background:rgba(255,255,255,.06); border-radius:6px; height:28px; overflow:hidden; position:relative; }
+.chart-bar-fill { height:100%; border-radius:6px; display:flex; align-items:center; padding:0 10px; font-size:12px; font-weight:700; }
+.chart-bar-val { width:50px; font-size:13px; font-weight:700; color:var(--text); }
+
+/* PRINT */
+@media print {
+  .sidebar,.topbar,.btn,.modal-overlay,.toast { display:none!important; }
+  .main { margin-left:0; }
+  .section { display:block!important; }
+  .section:not(.active) { display:none!important; }
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+.divider { height:1px; background:var(--border); margin:20px 0; }
+.flex { display:flex; }
+.flex-between { display:flex; justify-content:space-between; align-items:center; }
+.gap-8 { gap:8px; }
+.gap-12 { gap:12px; }
+.mb-16 { margin-bottom:16px; }
+.mb-20 { margin-bottom:20px; }
+.mt-8 { margin-top:8px; }
+.text-muted { color:var(--muted); font-size:13px; }
+.text-ember { color:var(--ember); }
+.text-green { color:var(--green); }
+.text-gold { color:var(--gold); }
+.text-glow { color:var(--glow); }
+.font-orbitron { font-family:'Orbitron',monospace; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo-area">
+    <div class="logo-top">HR</div>
+    <div class="logo-sub">SOFTWARE</div>
+    <div class="logo-full">Human Resource<br>Management System</div>
+    <div class="hr-badge">HR SYSTEM v2.0</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <div class="nav-item active" onclick="showSection('dashboard')"><span class="nav-icon">📊</span><span class="nav-text">Dashboard</span></div>
+    <div class="nav-item" onclick="showSection('employees')"><span class="nav-icon">👥</span><span class="nav-text">Employees</span><span class="nav-badge" id="empBadge">0</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Daily Ops</div>
+    <div class="nav-item" onclick="showSection('attendance')"><span class="nav-icon">✅</span><span class="nav-text">Attendance</span></div>
+    <div class="nav-item" onclick="showSection('payroll')"><span class="nav-icon">💰</span><span class="nav-text">Payroll</span></div>
+    <div class="nav-item" onclick="showSection('leave')"><span class="nav-icon">📅</span><span class="nav-text">Leave</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Growth</div>
+    <div class="nav-item" onclick="showSection('recruitment')"><span class="nav-icon">🎯</span><span class="nav-text">Recruitment</span></div>
+    <div class="nav-item" onclick="showSection('training')"><span class="nav-icon">🏆</span><span class="nav-text">Training</span></div>
+    <div class="nav-item" onclick="showSection('performance')"><span class="nav-icon">⚡</span><span class="nav-text">Performance</span></div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Admin</div>
+    <div class="nav-item" onclick="showSection('compliance')"><span class="nav-icon">🛡️</span><span class="nav-text">Compliance</span></div>
+    <div class="nav-item" onclick="showSection('reports')"><span class="nav-icon">📋</span><span class="nav-text">Reports</span></div>
+  </div>
+  <div class="sidebar-footer">Data saved locally · HR Software © 2025</div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="pageTitle">DASHBOARD</div>
+      <div class="page-subtitle" id="pageSubtitle">HR Overview</div>
+    </div>
+    <div class="topbar-right">
+      <div class="stat-pill" id="todayDate"></div>
+      <button class="btn btn-primary btn-sm" onclick="exportData()">⬇ Export</button>
+      <button class="btn btn-secondary btn-sm" onclick="importData()">⬆ Import</button>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <section class="section active" id="dashboard">
+      <div class="grid-4 mb-20">
+        <div class="stat-card red"><div class="stat-value font-orbitron" id="dash-total">0</div><div class="stat-label">Total Employees</div><div class="stat-icon">👥</div></div>
+        <div class="stat-card green"><div class="stat-value font-orbitron" id="dash-present">0</div><div class="stat-label">Present Today</div><div class="stat-icon">✅</div></div>
+        <div class="stat-card gold"><div class="stat-value font-orbitron" id="dash-leave">0</div><div class="stat-label">On Leave</div><div class="stat-icon">📅</div></div>
+        <div class="stat-card blue"><div class="stat-value font-orbitron" id="dash-payroll">₹0</div><div class="stat-label">Monthly Payroll</div><div class="stat-icon">💰</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Department Strength</div>
+          <div class="chart-bar-wrap" id="deptChart"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Today's Attendance Status</div>
+          <div id="attSummary" style="display:flex;flex-direction:column;gap:12px;"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px;">
+        <div class="card-title">Recent Employees</div>
+        <div class="table-wrap"><table id="dashEmpTable">
+          <thead><tr><th>Employee</th><th>Department</th><th>Designation</th><th>Joining Date</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- EMPLOYEES -->
+    <section class="section" id="employees">
+      <div class="search-bar">
+        <input class="search-input" id="empSearch" placeholder="🔍 Search by name, ID, department..." oninput="renderEmployees()">
+        <select class="form-input" id="empDeptFilter" style="width:180px" onchange="renderEmployees()">
+          <option value="">All Departments</option>
+          <option>Production</option><option>Quality</option><option>Maintenance</option>
+          <option>Stores</option><option>Admin/HR</option><option>Dispatch</option>
+        </select>
+        <button class="btn btn-primary" onclick="openModal('addEmpModal')">+ Add Employee</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Emp ID</th><th>Name</th><th>Department</th><th>Designation</th><th>Mobile</th><th>Basic (₹)</th><th>Joining</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="empTableBody"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section class="section" id="attendance">
+      <div class="flex-between mb-20">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <input type="date" class="form-input" id="attDate" onchange="renderAttendance()">
+          <select class="form-input" id="attDeptFilter" style="width:180px" onchange="renderAttendance()">
+            <option value="">All Departments</option>
+            <option>Production</option><option>Quality</option><option>Maintenance</option>
+            <option>Stores</option><option>Admin/HR</option><option>Dispatch</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-green btn-sm" onclick="markAll('P')">✅ All Present</button>
+          <button class="btn btn-secondary btn-sm" onclick="markAll('A')">❌ All Absent</button>
+          <button class="btn btn-primary" onclick="saveAttendance()">💾 Save Attendance</button>
+        </div>
+      </div>
+      <div class="card mb-20" id="attStatsBar" style="display:flex;gap:24px;padding:14px 20px;"></div>
+      <div class="att-grid" id="attGrid"></div>
+    </section>
+
+    <!-- PAYROLL -->
+    <section class="section" id="payroll">
+      <div class="search-bar">
+        <select class="form-input" id="payMonth" style="width:180px">
+          <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+          <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+          <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+          <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+        </select>
+        <select class="form-input" id="payYear" style="width:120px"></select>
+        <button class="btn btn-gold" onclick="generatePayroll()">⚙ Generate Payroll</button>
+        <button class="btn btn-green" onclick="printPayroll()">🖨 Print</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Emp ID</th><th>Name</th><th>Dept</th><th>Days Present</th><th>Basic (₹)</th><th>DA</th><th>HRA</th><th>Gross</th><th>PF</th><th>ESIC</th><th>Net Salary</th></tr></thead>
+          <tbody id="payrollTable"></tbody>
+        </table></div>
+      </div>
+      <div class="card" style="margin-top:20px;" id="payrollSummaryCard">
+        <div class="card-title">Payroll Summary</div>
+        <div class="grid-4" id="payrollSummary"></div>
+      </div>
+    </section>
+
+    <!-- LEAVE -->
+    <section class="section" id="leave">
+      <div class="leave-bal" id="leaveBal"></div>
+      <div class="flex-between mb-20">
+        <div class="tabs">
+          <div class="tab active" onclick="switchLeaveTab('pending',this)">Pending</div>
+          <div class="tab" onclick="switchLeaveTab('approved',this)">Approved</div>
+          <div class="tab" onclick="switchLeaveTab('rejected',this)">Rejected</div>
+          <div class="tab" onclick="switchLeaveTab('all',this)">All</div>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('leaveModal')">+ Apply Leave</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Employee</th><th>Leave Type</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="leaveTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- RECRUITMENT -->
+    <section class="section" id="recruitment">
+      <div class="flex-between mb-20">
+        <div class="card-title" style="margin:0">Open Positions</div>
+        <button class="btn btn-primary" onclick="openModal('jobModal')">+ Post Job</button>
+      </div>
+      <div id="jobCards" class="grid-3 mb-20"></div>
+      <div class="card">
+        <div class="card-title">Candidates Pipeline</div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Candidate</th><th>Position</th><th>Applied Date</th><th>Stage</th><th>Actions</th></tr></thead>
+          <tbody id="candidateTable"></tbody>
+        </table></div>
+        <div style="margin-top:12px;"><button class="btn btn-secondary btn-sm" onclick="openModal('candidateModal')">+ Add Candidate</button></div>
+      </div>
+    </section>
+
+    <!-- TRAINING -->
+    <section class="section" id="training">
+      <div class="flex-between mb-20">
+        <div class="card-title" style="margin:0">Training Programs</div>
+        <button class="btn btn-primary" onclick="openModal('trainingModal')">+ Add Program</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Program</th><th>Department</th><th>Trainer</th><th>Start Date</th><th>Duration</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="trainingTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- PERFORMANCE -->
+    <section class="section" id="performance">
+      <div class="flex-between mb-20">
+        <div class="card-title" style="margin:0">Performance Reviews</div>
+        <button class="btn btn-primary" onclick="openModal('perfModal')">+ Add Review</button>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <thead><tr><th>Employee</th><th>Department</th><th>Review Period</th><th>KPI Score</th><th>Attendance</th><th>Behavior</th><th>Overall</th><th>Actions</th></tr></thead>
+          <tbody id="perfTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- COMPLIANCE -->
+    <section class="section" id="compliance">
+      <div class="grid-3 mb-20">
+        <div class="stat-card green"><div class="stat-value font-orbitron" id="compPF">₹0</div><div class="stat-label">PF This Month</div></div>
+        <div class="stat-card gold"><div class="stat-value font-orbitron" id="compESIC">₹0</div><div class="stat-label">ESIC This Month</div></div>
+        <div class="stat-card blue"><div class="stat-value font-orbitron" id="compGratuity">₹0</div><div class="stat-label">Gratuity Provision</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Compliance Checklist</div>
+        <div id="complianceList" style="display:flex;flex-direction:column;gap:12px;"></div>
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="section" id="reports">
+      <div class="grid-3">
+        <div class="card" style="cursor:pointer;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+          <div style="font-size:28px;margin-bottom:8px">💰</div>
+          <div style="font-weight:700;margin-bottom:4px">Payroll Report</div>
+          <div class="text-muted">Salary, PF, ESIC summary</div>
+          <button class="btn btn-gold btn-sm" style="margin-top:12px;width:100%" onclick="reportPayroll()">Generate & Print</button>
+        </div>
+        <div class="card" style="cursor:pointer;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+          <div style="font-size:28px;margin-bottom:8px">👥</div>
+          <div style="font-weight:700;margin-bottom:4px">Employee Report</div>
+          <div class="text-muted">Full headcount list</div>
+          <button class="btn btn-green btn-sm" style="margin-top:12px;width:100%" onclick="reportEmployees()">Generate & Print</button>
+        </div>
+        <div class="card" style="cursor:pointer;transition:transform .2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+          <div style="font-size:28px;margin-bottom:8px">📋</div>
+          <div style="font-weight:700;margin-bottom:4px">Attendance Report</div>
+          <div class="text-muted">Monthly attendance analysis</div>
+          <button class="btn btn-blue btn-sm" style="margin-top:12px;width:100%" onclick="reportAttendance()">Generate & Print</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- MODALS -->
+<!-- Add Employee -->
+<div class="modal-overlay" id="addEmpModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">👤 Add New Employee</div><button class="modal-close" onclick="closeModal('addEmpModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">First Name *</label><input class="form-input" id="empFName" placeholder="Ramesh"></div>
+        <div class="form-group"><label class="form-label">Last Name *</label><input class="form-input" id="empLName" placeholder="Kumar"></div>
+        <div class="form-group"><label class="form-label">Department *</label>
+          <select class="form-input" id="empDept">
+            <option>Production</option><option>Quality</option><option>Maintenance</option>
+            <option>Stores</option><option>Admin/HR</option><option>Dispatch</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Designation *</label><input class="form-input" id="empDesig" placeholder="Machine Operator"></div>
+        <div class="form-group"><label class="form-label">Joining Date *</label><input class="form-input" type="date" id="empJoin"></div>
+        <div class="form-group"><label class="form-label">Mobile No. *</label><input class="form-input" id="empMobile" placeholder="9876543210"></div>
+        <div class="form-group"><label class="form-label">Basic Salary (₹) *</label><input class="form-input" type="number" id="empSalary" placeholder="18000"></div>
+        <div class="form-group"><label class="form-label">Gender</label>
+          <select class="form-input" id="empGender"><option>Male</option><option>Female</option><option>Other</option></select>
+        </div>
+        <div class="form-group full"><label class="form-label">Address</label><input class="form-input" id="empAddr" placeholder="Village/Town, District, Chhattisgarh"></div>
+        <div class="form-group"><label class="form-label">Aadhar No.</label><input class="form-input" id="empAadhar" placeholder="XXXX XXXX XXXX"></div>
+        <div class="form-group"><label class="form-label">PAN No.</label><input class="form-input" id="empPAN" placeholder="ABCDE1234F"></div>
+        <div class="form-group"><label class="form-label">Bank Account</label><input class="form-input" id="empBank" placeholder="Account Number"></div>
+        <div class="form-group"><label class="form-label">IFSC Code</label><input class="form-input" id="empIFSC" placeholder="SBIN0001234"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('addEmpModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addEmployee()">Save Employee</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Employee -->
+<div class="modal-overlay" id="editEmpModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">✏️ Edit Employee</div><button class="modal-close" onclick="closeModal('editEmpModal')">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="editEmpId">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="editFName"></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="editLName"></div>
+        <div class="form-group"><label class="form-label">Department</label>
+          <select class="form-input" id="editDept">
+            <option>Production</option><option>Quality</option><option>Maintenance</option>
+            <option>Stores</option><option>Admin/HR</option><option>Dispatch</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Designation</label><input class="form-input" id="editDesig"></div>
+        <div class="form-group"><label class="form-label">Mobile</label><input class="form-input" id="editMobile"></div>
+        <div class="form-group"><label class="form-label">Basic Salary (₹)</label><input class="form-input" type="number" id="editSalary"></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-input" id="editStatus"><option>Active</option><option>Inactive</option><option>On Leave</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Bank Account</label><input class="form-input" id="editBank"></div>
+        <div class="form-group"><label class="form-label">Aadhar</label><input class="form-input" id="editAadhar"></div>
+        <div class="form-group"><label class="form-label">PAN</label><input class="form-input" id="editPAN"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('editEmpModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditEmployee()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Leave Modal -->
+<div class="modal-overlay" id="leaveModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">📅 Apply Leave</div><button class="modal-close" onclick="closeModal('leaveModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Employee *</label>
+          <select class="form-input" id="leaveEmp"></select>
+        </div>
+        <div class="form-group"><label class="form-label">Leave Type *</label>
+          <select class="form-input" id="leaveType">
+            <option>Casual Leave</option><option>Sick Leave</option><option>Earned Leave</option><option>Maternity/Paternity</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">From Date *</label><input class="form-input" type="date" id="leaveFrom"></div>
+        <div class="form-group"><label class="form-label">To Date *</label><input class="form-input" type="date" id="leaveTo"></div>
+        <div class="form-group full"><label class="form-label">Reason</label><input class="form-input" id="leaveReason" placeholder="Reason for leave..."></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('leaveModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="applyLeave()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Job Modal -->
+<div class="modal-overlay" id="jobModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">🎯 Post Job Opening</div><button class="modal-close" onclick="closeModal('jobModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Job Title *</label><input class="form-input" id="jobTitle" placeholder="Machine Operator"></div>
+        <div class="form-group"><label class="form-label">Department</label>
+          <select class="form-input" id="jobDept">
+            <option>Production</option><option>Quality</option><option>Maintenance</option><option>Stores</option><option>Admin/HR</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Openings</label><input class="form-input" type="number" id="jobCount" placeholder="1" min="1" value="1"></div>
+        <div class="form-group"><label class="form-label">Salary Range (₹)</label><input class="form-input" id="jobSalary" placeholder="15,000 - 22,000"></div>
+        <div class="form-group"><label class="form-label">Experience</label><input class="form-input" id="jobExp" placeholder="2-3 years"></div>
+        <div class="form-group full"><label class="form-label">Description</label><input class="form-input" id="jobDesc" placeholder="Key responsibilities..."></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('jobModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="postJob()">Post Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- Candidate Modal -->
+<div class="modal-overlay" id="candidateModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">👤 Add Candidate</div><button class="modal-close" onclick="closeModal('candidateModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Candidate Name *</label><input class="form-input" id="candName" placeholder="Full Name"></div>
+        <div class="form-group"><label class="form-label">Applied For *</label><select class="form-input" id="candJob"></select></div>
+        <div class="form-group"><label class="form-label">Mobile</label><input class="form-input" id="candMobile" placeholder="9876543210"></div>
+        <div class="form-group"><label class="form-label">Stage</label>
+          <select class="form-input" id="candStage">
+            <option>Applied</option><option>Screening</option><option>Interview</option><option>Selected</option><option>Rejected</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('candidateModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addCandidate()">Add Candidate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Training Modal -->
+<div class="modal-overlay" id="trainingModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">🏆 Add Training Program</div><button class="modal-close" onclick="closeModal('trainingModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Program Name *</label><input class="form-input" id="trainName" placeholder="Safety Training"></div>
+        <div class="form-group"><label class="form-label">Department</label>
+          <select class="form-input" id="trainDept">
+            <option>All</option><option>Production</option><option>Quality</option><option>Maintenance</option><option>Stores</option><option>Admin/HR</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Trainer</label><input class="form-input" id="trainTrainer" placeholder="Trainer Name"></div>
+        <div class="form-group"><label class="form-label">Start Date</label><input class="form-input" type="date" id="trainDate"></div>
+        <div class="form-group"><label class="form-label">Duration</label><input class="form-input" id="trainDuration" placeholder="3 days / 2 weeks"></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="form-input" id="trainStatus"><option>Planned</option><option>Ongoing</option><option>Completed</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('trainingModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addTraining()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Performance Modal -->
+<div class="modal-overlay" id="perfModal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">⚡ Add Performance Review</div><button class="modal-close" onclick="closeModal('perfModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Employee *</label><select class="form-input" id="perfEmp"></select></div>
+        <div class="form-group"><label class="form-label">Review Period</label><input class="form-input" id="perfPeriod" placeholder="Q1 2025 / Jan-Mar 2025"></div>
+        <div class="form-group"><label class="form-label">KPI Score (1-10)</label><input class="form-input" type="number" id="perfKPI" min="1" max="10" placeholder="7"></div>
+        <div class="form-group"><label class="form-label">Attendance Score (1-10)</label><input class="form-input" type="number" id="perfAtt" min="1" max="10" placeholder="8"></div>
+        <div class="form-group"><label class="form-label">Behavior Score (1-10)</label><input class="form-input" type="number" id="perfBeh" min="1" max="10" placeholder="8"></div>
+        <div class="form-group"><label class="form-label">Remarks</label><input class="form-input" id="perfRemarks" placeholder="Brief remarks..."></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('perfModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addPerformance()">Save Review</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toastMsg">Done!</span></div>
+
+<!-- HIDDEN INPUT for import -->
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+// ============================================================
+// DATA STORE (localStorage)
+// ============================================================
+const DB = {
+  get(k){ try{ return JSON.parse(localStorage.getItem('cmcgp_'+k)||'null'); }catch(e){ return null; } },
+  set(k,v){ localStorage.setItem('cmcgp_'+k, JSON.stringify(v)); },
+  default(k,d){ if(!localStorage.getItem('cmcgp_'+k)) this.set(k,d); return this.get(k); }
+};
+
+let employees = DB.default('employees', []);
+let attendance = DB.default('attendance', {});
+let leaves = DB.default('leaves', []);
+let jobs = DB.default('jobs', []);
+let candidates = DB.default('candidates', []);
+let trainings = DB.default('trainings', []);
+let performances = DB.default('performances', []);
+let empCounter = DB.default('empCounter', 1);
+
+function save(){
+  DB.set('employees', employees);
+  DB.set('attendance', attendance);
+  DB.set('leaves', leaves);
+  DB.set('jobs', jobs);
+  DB.set('candidates', candidates);
+  DB.set('trainings', trainings);
+  DB.set('performances', performances);
+  DB.set('empCounter', empCounter);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+const sectionMeta = {
+  dashboard:   { title:'DASHBOARD',          subtitle:'HR Overview — Live Data' },
+  employees:   { title:'EMPLOYEES',          subtitle:'Manage workforce & profiles' },
+  attendance:  { title:'ATTENDANCE',         subtitle:'Track daily presence & hours' },
+  payroll:     { title:'PAYROLL',            subtitle:'Salary processing & disbursement' },
+  leave:       { title:'LEAVE MANAGEMENT',   subtitle:'Leave requests & holiday calendar' },
+  recruitment: { title:'RECRUITMENT',        subtitle:'Hiring pipeline & job postings' },
+  training:    { title:'TRAINING',           subtitle:'Employee skill programs' },
+  performance: { title:'PERFORMANCE',        subtitle:'KPI tracking & appraisals' },
+  compliance:  { title:'COMPLIANCE',         subtitle:'Statutory & legal compliance' },
+  reports:     { title:'REPORTS',            subtitle:'HR analytics & exports' }
+};
+
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active');
+  });
+  const m=sectionMeta[id]||{};
+  document.getElementById('pageTitle').textContent=m.title||id.toUpperCase();
+  document.getElementById('pageSubtitle').textContent=m.subtitle||'';
+  // Refresh section data
+  if(id==='dashboard') renderDashboard();
+  if(id==='employees') renderEmployees();
+  if(id==='attendance') renderAttendance();
+  if(id==='payroll') renderPayroll();
+  if(id==='leave') renderLeave();
+  if(id==='recruitment') renderRecruitment();
+  if(id==='training') renderTraining();
+  if(id==='performance') renderPerformance();
+  if(id==='compliance') renderCompliance();
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); populateModals(id); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',function(e){ if(e.target===this) closeModal(this.id); });
+});
+
+let toastTimer;
+function showToast(msg, type=''){
+  clearTimeout(toastTimer);
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.className='toast '+(type);
+  setTimeout(()=>t.classList.add('show'),10);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ============================================================
+// EMPLOYEE FUNCTIONS
+// ============================================================
+function genEmpId(){
+  const id='EMP-'+String(empCounter).padStart(3,'0');
+  empCounter++;
+  DB.set('empCounter',empCounter);
+  return id;
+}
+
+function addEmployee(){
+  const fn=document.getElementById('empFName').value.trim();
+  const ln=document.getElementById('empLName').value.trim();
+  const sal=parseInt(document.getElementById('empSalary').value);
+  if(!fn||!ln||!sal){ showToast('❌ Name aur Salary zaroori hai','error'); return; }
+  const emp={
+    id: genEmpId(),
+    firstName: fn, lastName: ln,
+    name: fn+' '+ln,
+    dept: document.getElementById('empDept').value,
+    designation: document.getElementById('empDesig').value,
+    joining: document.getElementById('empJoin').value,
+    mobile: document.getElementById('empMobile').value,
+    salary: sal,
+    gender: document.getElementById('empGender').value,
+    address: document.getElementById('empAddr').value,
+    aadhar: document.getElementById('empAadhar').value,
+    pan: document.getElementById('empPAN').value,
+    bank: document.getElementById('empBank').value,
+    ifsc: document.getElementById('empIFSC').value,
+    status: 'Active',
+    addedOn: new Date().toISOString()
+  };
+  employees.push(emp);
+  save();
+  closeModal('addEmpModal');
+  clearEmpForm();
+  renderEmployees();
+  updateBadge();
+  showToast('✅ Employee '+emp.id+' added!','success');
+}
+
+function clearEmpForm(){
+  ['empFName','empLName','empDesig','empMobile','empSalary','empAddr','empAadhar','empPAN','empBank','empIFSC','empJoin'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+}
+
+function editEmployee(id){
+  const emp=employees.find(e=>e.id===id);
+  if(!emp) return;
+  document.getElementById('editEmpId').value=emp.id;
+  document.getElementById('editFName').value=emp.firstName||emp.name.split(' ')[0];
+  document.getElementById('editLName').value=emp.lastName||emp.name.split(' ').slice(1).join(' ');
+  document.getElementById('editDept').value=emp.dept;
+  document.getElementById('editDesig').value=emp.designation;
+  document.getElementById('editMobile').value=emp.mobile;
+  document.getElementById('editSalary').value=emp.salary;
+  document.getElementById('editStatus').value=emp.status;
+  document.getElementById('editBank').value=emp.bank||'';
+  document.getElementById('editAadhar').value=emp.aadhar||'';
+  document.getElementById('editPAN').value=emp.pan||'';
+  openModal('editEmpModal');
+}
+
+function saveEditEmployee(){
+  const id=document.getElementById('editEmpId').value;
+  const idx=employees.findIndex(e=>e.id===id);
+  if(idx<0) return;
+  const fn=document.getElementById('editFName').value.trim();
+  const ln=document.getElementById('editLName').value.trim();
+  employees[idx]={...employees[idx],
+    firstName:fn, lastName:ln, name:fn+' '+ln,
+    dept:document.getElementById('editDept').value,
+    designation:document.getElementById('editDesig').value,
+    mobile:document.getElementById('editMobile').value,
+    salary:parseInt(document.getElementById('editSalary').value),
+    status:document.getElementById('editStatus').value,
+    bank:document.getElementById('editBank').value,
+    aadhar:document.getElementById('editAadhar').value,
+    pan:document.getElementById('editPAN').value
+  };
+  save(); closeModal('editEmpModal'); renderEmployees(); renderDashboard();
+  showToast('✅ Employee updated!','success');
+}
+
+function deleteEmployee(id){
+  if(!confirm('Delete '+id+'? Ye action undo nahi hoga.')) return;
+  employees=employees.filter(e=>e.id!==id);
+  save(); renderEmployees(); renderDashboard(); updateBadge();
+  showToast('🗑 Employee removed','');
+}
+
+function renderEmployees(){
+  const search=(document.getElementById('empSearch')||{value:''}).value.toLowerCase();
+  const deptF=(document.getElementById('empDeptFilter')||{value:''}).value;
+  let list=employees.filter(e=>{
+    const matchSearch=!search||(e.name.toLowerCase().includes(search)||e.id.toLowerCase().includes(search)||(e.dept||'').toLowerCase().includes(search));
+    const matchDept=!deptF||e.dept===deptF;
+    return matchSearch&&matchDept;
+  });
+  const tbody=document.getElementById('empTableBody');
+  if(!tbody) return;
+  if(!list.length){ tbody.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:30px">No employees found. Click "+ Add Employee" to add.</td></tr>'; return; }
+  tbody.innerHTML=list.map(e=>`
+    <tr>
+      <td><span class="font-orbitron" style="font-size:12px;color:var(--glow)">${e.id}</span></td>
+      <td><strong>${e.name}</strong>${e.gender?'<br><span style="font-size:11px;color:var(--muted)">'+e.gender+'</span>':''}</td>
+      <td>${e.dept}</td>
+      <td>${e.designation||'-'}</td>
+      <td>${e.mobile||'-'}</td>
+      <td>₹${(e.salary||0).toLocaleString()}</td>
+      <td>${e.joining||'-'}</td>
+      <td><span class="badge badge-${e.status==='Active'?'green':e.status==='Inactive'?'red':'gold'}">${e.status}</span></td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-secondary btn-sm" onclick="editEmployee('${e.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteEmployee('${e.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+  updateBadge();
+}
+
+function updateBadge(){
+  const b=document.getElementById('empBadge');
+  if(b) b.textContent=employees.length;
+}
+
+// ============================================================
+// ATTENDANCE
+// ============================================================
+function getAttKey(date){ return date||document.getElementById('attDate').value; }
+
+function renderAttendance(){
+  const deptF=(document.getElementById('attDeptFilter')||{value:''}).value;
+  const date=document.getElementById('attDate').value;
+  if(!date){ return; }
+  const key=getAttKey(date);
+  const rec=attendance[key]||{};
+  let list=employees.filter(e=>e.status!=='Inactive'&&(!deptF||e.dept===deptF));
+
+  // Stats bar
+  const stats={P:0,A:0,H:0,total:list.length};
+  list.forEach(e=>{ const s=rec[e.id]||''; if(s==='P') stats.P++; else if(s==='A') stats.A++; else if(s==='H') stats.H++; });
+  const bar=document.getElementById('attStatsBar');
+  if(bar) bar.innerHTML=`
+    <div><span class="font-orbitron text-green" style="font-size:18px">${stats.P}</span><br><span class="text-muted" style="font-size:12px">Present</span></div>
+    <div><span class="font-orbitron text-ember" style="font-size:18px">${stats.A}</span><br><span class="text-muted" style="font-size:12px">Absent</span></div>
+    <div><span class="font-orbitron text-gold" style="font-size:18px">${stats.H}</span><br><span class="text-muted" style="font-size:12px">Half Day</span></div>
+    <div><span class="font-orbitron" style="font-size:18px">${stats.total}</span><br><span class="text-muted" style="font-size:12px">Total</span></div>
+    <div><span class="font-orbitron text-glow" style="font-size:18px">${stats.total?Math.round(stats.P/stats.total*100):0}%</span><br><span class="text-muted" style="font-size:12px">Attendance %</span></div>`;
+
+  const grid=document.getElementById('attGrid');
+  if(!list.length){ grid.innerHTML='<p style="color:var(--muted)">No employees. Add employees first.</p>'; return; }
+  grid.innerHTML=list.map(e=>{
+    const s=rec[e.id]||'';
+    return `<div class="att-card">
+      <div class="att-name">${e.name}</div>
+      <div class="att-id">${e.id} · ${e.dept}</div>
+      <div class="att-btns">
+        <button class="att-btn present ${s==='P'?'active':''}" onclick="setAtt('${e.id}','P',this)">✅ P</button>
+        <button class="att-btn absent ${s==='A'?'active':''}" onclick="setAtt('${e.id}','A',this)">❌ A</button>
+        <button class="att-btn halfday ${s==='H'?'active':''}" onclick="setAtt('${e.id}','H',this)">½ H</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setAtt(empId, status, btn){
+  const date=document.getElementById('attDate').value;
+  if(!date){ showToast('❌ Pehle date select karo','error'); return; }
+  const key=getAttKey(date);
+  if(!attendance[key]) attendance[key]={};
+  attendance[key][empId]=status;
+  // Update UI
+  const card=btn.closest('.att-card');
+  card.querySelectorAll('.att-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // Update stats
+  renderAttendanceStats(date);
+}
+
+function renderAttendanceStats(date){
+  const key=getAttKey(date);
+  const rec=attendance[key]||{};
+  const deptF=document.getElementById('attDeptFilter').value;
+  const list=employees.filter(e=>e.status!=='Inactive'&&(!deptF||e.dept===deptF));
+  const stats={P:0,A:0,H:0,total:list.length};
+  list.forEach(e=>{ const s=rec[e.id]||''; if(s==='P') stats.P++; else if(s==='A') stats.A++; else if(s==='H') stats.H++; });
+  const bar=document.getElementById('attStatsBar');
+  if(bar) bar.innerHTML=`
+    <div><span class="font-orbitron text-green" style="font-size:18px">${stats.P}</span><br><span class="text-muted" style="font-size:12px">Present</span></div>
+    <div><span class="font-orbitron text-ember" style="font-size:18px">${stats.A}</span><br><span class="text-muted" style="font-size:12px">Absent</span></div>
+    <div><span class="font-orbitron text-gold" style="font-size:18px">${stats.H}</span><br><span class="text-muted" style="font-size:12px">Half Day</span></div>
+    <div><span class="font-orbitron" style="font-size:18px">${stats.total}</span><br><span class="text-muted" style="font-size:12px">Total</span></div>
+    <div><span class="font-orbitron text-glow" style="font-size:18px">${stats.total?Math.round(stats.P/stats.total*100):0}%</span><br><span class="text-muted" style="font-size:12px">Attendance %</span></div>`;
+}
+
+function markAll(status){
+  const date=document.getElementById('attDate').value;
+  if(!date){ showToast('❌ Date select karo pehle','error'); return; }
+  const key=getAttKey(date);
+  if(!attendance[key]) attendance[key]={};
+  const deptF=document.getElementById('attDeptFilter').value;
+  employees.filter(e=>e.status!=='Inactive'&&(!deptF||e.dept===deptF)).forEach(e=>{ attendance[key][e.id]=status; });
+  renderAttendance();
+}
+
+function saveAttendance(){
+  const date=document.getElementById('attDate').value;
+  if(!date){ showToast('❌ Date select karo','error'); return; }
+  save();
+  showToast('✅ Attendance saved for '+date,'success');
+}
+
+// ============================================================
+// PAYROLL
+// ============================================================
+function getWorkingDays(month, year){
+  const d=new Date(year, month, 0).getDate();
+  let working=0;
+  for(let i=1;i<=d;i++){ const day=new Date(year,month-1,i).getDay(); if(day!==0) working++; }
+  return working;
+}
+
+function getEmpAttDays(empId, month, year){
+  let p=0, h=0;
+  Object.keys(attendance).forEach(dateStr=>{
+    const d=new Date(dateStr);
+    if(d.getMonth()+1===month&&d.getFullYear()===year){
+      const s=(attendance[dateStr]||{})[empId];
+      if(s==='P') p++;
+      else if(s==='H') h+=0.5;
+    }
+  });
+  return p+h;
+}
+
+function calcPayroll(emp, month, year){
+  const workingDays=getWorkingDays(month,year);
+  const presentDays=getEmpAttDays(emp.id,month,year)||workingDays;
+  const basic=emp.salary||0;
+  const perDay=basic/workingDays;
+  const earned=Math.round(perDay*presentDays);
+  const da=Math.round(earned*0.12);
+  const hra=Math.round(earned*0.08);
+  const gross=earned+da+hra;
+  const pf=Math.round(gross*0.12);
+  const esic=Math.round(gross*0.0175);
+  const net=gross-pf-esic;
+  return {presentDays:Math.round(presentDays*2)/2, workingDays, basic, earned, da, hra, gross, pf, esic, net};
+}
+
+function generatePayroll(){
+  const month=parseInt(document.getElementById('payMonth').value);
+  const year=parseInt(document.getElementById('payYear').value);
+  const tbody=document.getElementById('payrollTable');
+  if(!employees.length){ tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:20px">No employees found</td></tr>'; return; }
+  let totalGross=0, totalPF=0, totalESIC=0, totalNet=0;
+  tbody.innerHTML=employees.filter(e=>e.status==='Active').map(e=>{
+    const p=calcPayroll(e,month,year);
+    totalGross+=p.gross; totalPF+=p.pf; totalESIC+=p.esic; totalNet+=p.net;
+    return `<tr>
+      <td class="font-orbitron" style="font-size:12px;color:var(--glow)">${e.id}</td>
+      <td>${e.name}</td><td>${e.dept}</td>
+      <td>${p.presentDays}/${p.workingDays}</td>
+      <td>₹${p.earned.toLocaleString()}</td>
+      <td>₹${p.da.toLocaleString()}</td>
+      <td>₹${p.hra.toLocaleString()}</td>
+      <td>₹${p.gross.toLocaleString()}</td>
+      <td style="color:var(--ember)">₹${p.pf.toLocaleString()}</td>
+      <td style="color:var(--gold)">₹${p.esic.toLocaleString()}</td>
+      <td style="color:var(--green);font-weight:700">₹${p.net.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+  const summary=document.getElementById('payrollSummary');
+  if(summary) summary.innerHTML=`
+    <div class="stat-card green"><div class="stat-value font-orbitron" style="font-size:20px">₹${totalGross.toLocaleString()}</div><div class="stat-label">Total Gross</div></div>
+    <div class="stat-card red"><div class="stat-value font-orbitron" style="font-size:20px">₹${totalPF.toLocaleString()}</div><div class="stat-label">Total PF</div></div>
+    <div class="stat-card gold"><div class="stat-value font-orbitron" style="font-size:20px">₹${totalESIC.toLocaleString()}</div><div class="stat-label">Total ESIC</div></div>
+    <div class="stat-card blue"><div class="stat-value font-orbitron" style="font-size:20px">₹${totalNet.toLocaleString()}</div><div class="stat-label">Net Payable</div></div>`;
+  showToast('✅ Payroll generated!','success');
+}
+
+function renderPayroll(){
+  const now=new Date();
+  document.getElementById('payMonth').value=now.getMonth()+1;
+  const yearSel=document.getElementById('payYear');
+  yearSel.innerHTML='';
+  for(let y=now.getFullYear();y>=now.getFullYear()-3;y--){
+    const o=document.createElement('option'); o.value=y; o.textContent=y; yearSel.appendChild(o);
+  }
+  generatePayroll();
+}
+
+function printPayroll(){ window.print(); }
+
+// ============================================================
+// LEAVE
+// ============================================================
+let currentLeaveTab='pending';
+
+function switchLeaveTab(tab, el){
+  currentLeaveTab=tab;
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderLeave();
+}
+
+function applyLeave(){
+  const empId=document.getElementById('leaveEmp').value;
+  const from=document.getElementById('leaveFrom').value;
+  const to=document.getElementById('leaveTo').value;
+  if(!empId||!from||!to){ showToast('❌ Employee aur dates zaroori hain','error'); return; }
+  const d1=new Date(from), d2=new Date(to);
+  if(d2<d1){ showToast('❌ To date, From date se pehle nahi ho sakti','error'); return; }
+  const days=Math.ceil((d2-d1)/(1000*60*60*24))+1;
+  leaves.push({
+    id:'LV-'+Date.now(),
+    empId, empName:employees.find(e=>e.id===empId)?.name||empId,
+    type:document.getElementById('leaveType').value,
+    from, to, days,
+    reason:document.getElementById('leaveReason').value,
+    status:'Pending',
+    appliedOn:new Date().toISOString()
+  });
+  save(); closeModal('leaveModal'); renderLeave();
+  showToast('📅 Leave request submitted!','success');
+}
+
+function approveLeave(id){ updateLeaveStatus(id,'Approved'); }
+function rejectLeave(id){ updateLeaveStatus(id,'Rejected'); }
+function updateLeaveStatus(id,status){
+  const l=leaves.find(x=>x.id===id);
+  if(l){ l.status=status; save(); renderLeave(); showToast((status==='Approved'?'✅':'❌')+' Leave '+status,'success'); }
+}
+
+function renderLeave(){
+  // Balance cards
+  const balEl=document.getElementById('leaveBal');
+  const types=['Casual Leave','Sick Leave','Earned Leave'];
+  const max={CL:12,SL:12,EL:15};
+  const used={};
+  leaves.filter(l=>l.status==='Approved').forEach(l=>{ used[l.type]=(used[l.type]||0)+l.days; });
+  if(balEl) balEl.innerHTML=types.map(t=>{
+    const u=used[t]||0;
+    const m=t==='Earned Leave'?15:12;
+    return `<div class="leave-type-card">
+      <div class="leave-type-name">${t.replace(' Leave','')}</div>
+      <div class="leave-type-count">${m-u}</div>
+      <div class="leave-type-total">of ${m} remaining</div>
+    </div>`;
+  }).join('');
+
+  const tab=currentLeaveTab;
+  let list=leaves;
+  if(tab==='pending') list=leaves.filter(l=>l.status==='Pending');
+  else if(tab==='approved') list=leaves.filter(l=>l.status==='Approved');
+  else if(tab==='rejected') list=leaves.filter(l=>l.status==='Rejected');
+
+  const tbody=document.getElementById('leaveTable');
+  if(!tbody) return;
+  if(!list.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">No leave requests</td></tr>'; return; }
+  tbody.innerHTML=list.sort((a,b)=>new Date(b.appliedOn)-new Date(a.appliedOn)).map(l=>`
+    <tr>
+      <td><strong>${l.empName}</strong><br><span style="font-size:11px;color:var(--muted)">${l.empId}</span></td>
+      <td>${l.type}</td>
+      <td>${l.from}</td><td>${l.to}</td>
+      <td>${l.days} day${l.days>1?'s':''}</td>
+      <td>${l.reason||'-'}</td>
+      <td><span class="badge badge-${l.status==='Approved'?'green':l.status==='Rejected'?'red':'gold'}">${l.status}</span></td>
+      <td style="display:flex;gap:4px;">
+        ${l.status==='Pending'?`<button class="btn btn-green btn-sm" onclick="approveLeave('${l.id}')">✅</button><button class="btn btn-danger btn-sm" onclick="rejectLeave('${l.id}')">❌</button>`:''}
+        <button class="btn btn-secondary btn-sm" onclick="deleteLeave('${l.id}')">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+function deleteLeave(id){ leaves=leaves.filter(l=>l.id!==id); save(); renderLeave(); }
+
+// ============================================================
+// RECRUITMENT
+// ============================================================
+function postJob(){
+  const title=document.getElementById('jobTitle').value.trim();
+  if(!title){ showToast('❌ Job title zaroori hai','error'); return; }
+  jobs.push({
+    id:'JB-'+Date.now(),
+    title, dept:document.getElementById('jobDept').value,
+    count:parseInt(document.getElementById('jobCount').value)||1,
+    salary:document.getElementById('jobSalary').value,
+    exp:document.getElementById('jobExp').value,
+    desc:document.getElementById('jobDesc').value,
+    status:'Open', postedOn:new Date().toISOString()
+  });
+  save(); closeModal('jobModal'); renderRecruitment();
+  showToast('🎯 Job posted!','success');
+  ['jobTitle','jobSalary','jobExp','jobDesc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('jobCount').value='1';
+}
+
+function closeJob(id){ const j=jobs.find(x=>x.id===id); if(j){ j.status='Closed'; save(); renderRecruitment(); } }
+
+function addCandidate(){
+  const name=document.getElementById('candName').value.trim();
+  const jobId=document.getElementById('candJob').value;
+  if(!name||!jobId){ showToast('❌ Name aur job zaroori hai','error'); return; }
+  const job=jobs.find(j=>j.id===jobId);
+  candidates.push({
+    id:'CD-'+Date.now(),
+    name, jobId, position:job?job.title:'',
+    mobile:document.getElementById('candMobile').value,
+    stage:document.getElementById('candStage').value,
+    appliedOn:new Date().toISOString()
+  });
+  save(); closeModal('candidateModal'); renderRecruitment();
+  showToast('👤 Candidate added!','success');
+}
+
+function updateCandStage(id, stage){ const c=candidates.find(x=>x.id===id); if(c){ c.stage=stage; save(); renderRecruitment(); } }
+
+function renderRecruitment(){
+  const jobCards=document.getElementById('jobCards');
+  if(jobCards){
+    if(!jobs.length) jobCards.innerHTML='<p style="color:var(--muted);grid-column:1/-1">No open positions. Click "+ Post Job".</p>';
+    else jobCards.innerHTML=jobs.map(j=>`
+      <div class="card">
+        <div class="flex-between mb-16">
+          <span class="badge badge-${j.status==='Open'?'green':'red'}">${j.status}</span>
+          ${j.status==='Open'?`<button class="btn btn-danger btn-sm" onclick="closeJob('${j.id}')">Close</button>`:''}
+        </div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">${j.title}</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">${j.dept} · ${j.count} opening${j.count>1?'s':''}</div>
+        ${j.salary?`<div style="font-size:13px;color:var(--green)">₹${j.salary}</div>`:''}
+        ${j.exp?`<div class="text-muted">Exp: ${j.exp}</div>`:''}
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">${candidates.filter(c=>c.jobId===j.id).length} candidates</div>
+      </div>`).join('');
+  }
+  const tbody=document.getElementById('candidateTable');
+  if(!tbody) return;
+  if(!candidates.length){ tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">No candidates yet</td></tr>'; return; }
+  tbody.innerHTML=candidates.map(c=>`
+    <tr>
+      <td><strong>${c.name}</strong><br><span style="font-size:11px;color:var(--muted)">${c.mobile||''}</span></td>
+      <td>${c.position}</td>
+      <td>${c.appliedOn?c.appliedOn.split('T')[0]:'-'}</td>
+      <td>
+        <select class="form-input" style="padding:4px 8px;font-size:12px" onchange="updateCandStage('${c.id}',this.value)">
+          ${['Applied','Screening','Interview','Selected','Rejected'].map(s=>`<option ${c.stage===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteCandidate('${c.id}')">🗑</button></td>
+    </tr>`).join('');
+}
+
+function deleteCandidate(id){ candidates=candidates.filter(c=>c.id!==id); save(); renderRecruitment(); }
+
+// ============================================================
+// TRAINING
+// ============================================================
+function addTraining(){
+  const name=document.getElementById('trainName').value.trim();
+  if(!name){ showToast('❌ Program name zaroori hai','error'); return; }
+  trainings.push({
+    id:'TR-'+Date.now(),
+    name, dept:document.getElementById('trainDept').value,
+    trainer:document.getElementById('trainTrainer').value,
+    date:document.getElementById('trainDate').value,
+    duration:document.getElementById('trainDuration').value,
+    status:document.getElementById('trainStatus').value
+  });
+  save(); closeModal('trainingModal'); renderTraining();
+  showToast('🏆 Training added!','success');
+}
+
+function renderTraining(){
+  const tbody=document.getElementById('trainingTable');
+  if(!tbody) return;
+  if(!trainings.length){ tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No training programs. Click "+ Add Program".</td></tr>'; return; }
+  tbody.innerHTML=trainings.map(t=>`
+    <tr>
+      <td><strong>${t.name}</strong></td>
+      <td>${t.dept}</td>
+      <td>${t.trainer||'-'}</td>
+      <td>${t.date||'-'}</td>
+      <td>${t.duration||'-'}</td>
+      <td><span class="badge badge-${t.status==='Completed'?'green':t.status==='Ongoing'?'blue':'gold'}">${t.status}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteTraining('${t.id}')">🗑</button></td>
+    </tr>`).join('');
+}
+
+function deleteTraining(id){ trainings=trainings.filter(t=>t.id!==id); save(); renderTraining(); }
+
+// ============================================================
+// PERFORMANCE
+// ============================================================
+function addPerformance(){
+  const empId=document.getElementById('perfEmp').value;
+  if(!empId){ showToast('❌ Employee select karo','error'); return; }
+  const emp=employees.find(e=>e.id===empId);
+  const kpi=parseInt(document.getElementById('perfKPI').value)||0;
+  const att=parseInt(document.getElementById('perfAtt').value)||0;
+  const beh=parseInt(document.getElementById('perfBeh').value)||0;
+  const overall=((kpi+att+beh)/3).toFixed(1);
+  performances.push({
+    id:'PF-'+Date.now(),
+    empId, empName:emp?emp.name:empId,
+    dept:emp?emp.dept:'-',
+    period:document.getElementById('perfPeriod').value,
+    kpi, att, beh, overall,
+    remarks:document.getElementById('perfRemarks').value
+  });
+  save(); closeModal('perfModal'); renderPerformance();
+  showToast('⚡ Review saved!','success');
+}
+
+function renderPerformance(){
+  const tbody=document.getElementById('perfTable');
+  if(!tbody) return;
+  if(!performances.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px">No reviews yet. Click "+ Add Review".</td></tr>'; return; }
+  tbody.innerHTML=performances.map(p=>`
+    <tr>
+      <td><strong>${p.empName}</strong></td>
+      <td>${p.dept}</td>
+      <td>${p.period||'-'}</td>
+      <td>${scoreBar(p.kpi)}</td>
+      <td>${scoreBar(p.att)}</td>
+      <td>${scoreBar(p.beh)}</td>
+      <td><span class="font-orbitron" style="color:${p.overall>=7?'var(--green)':p.overall>=5?'var(--gold)':'var(--ember)'}">${p.overall}/10</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletePerf('${p.id}')">🗑</button></td>
+    </tr>`).join('');
+}
+
+function scoreBar(v){ return `<span style="color:${v>=7?'var(--green)':v>=5?'var(--gold)':'var(--ember)'}">${v}/10</span>`; }
+function deletePerf(id){ performances=performances.filter(p=>p.id!==id); save(); renderPerformance(); }
+
+// ============================================================
+// COMPLIANCE
+// ============================================================
+function renderCompliance(){
+  const now=new Date();
+  const m=now.getMonth()+1, y=now.getFullYear();
+  let totalPF=0, totalESIC=0;
+  employees.filter(e=>e.status==='Active').forEach(e=>{
+    const p=calcPayroll(e,m,y);
+    totalPF+=p.pf; totalESIC+=p.esic;
+  });
+  const totalBasic=employees.filter(e=>e.status==='Active').reduce((s,e)=>s+(e.salary||0),0);
+  document.getElementById('compPF').textContent='₹'+totalPF.toLocaleString();
+  document.getElementById('compESIC').textContent='₹'+totalESIC.toLocaleString();
+  document.getElementById('compGratuity').textContent='₹'+Math.round(totalBasic*0.0481).toLocaleString();
+
+  const list=[
+    {name:'PF Monthly Deposit',due:'15th of every month',status:now.getDate()>15?'Overdue':'Pending'},
+    {name:'ESIC Monthly Deposit',due:'15th of every month',status:now.getDate()>15?'Overdue':'Pending'},
+    {name:'PF Annual Return',due:'April 30',status:'Pending'},
+    {name:'ESIC Half-Yearly Return',due:'November 11 & May 12',status:'Pending'},
+    {name:'Bonus Payment',due:'November 30',status:'Pending'},
+    {name:'Leave Register Update',due:'Monthly',status:'Done'},
+    {name:'Wages Register',due:'Monthly',status:'Done'},
+    {name:'Muster Roll',due:'Daily',status:'Done'},
+  ];
+  document.getElementById('complianceList').innerHTML=list.map(i=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;">
+      <div><div style="font-weight:600">${i.name}</div><div class="text-muted">Due: ${i.due}</div></div>
+      <span class="badge badge-${i.status==='Done'?'green':i.status==='Overdue'?'red':'gold'}">${i.status}</span>
+    </div>`).join('');
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard(){
+  const active=employees.filter(e=>e.status==='Active');
+  document.getElementById('dash-total').textContent=employees.length;
+
+  // Today attendance
+  const today=new Date().toISOString().split('T')[0];
+  const todayRec=attendance[today]||{};
+  let present=0, onLeave=0;
+  active.forEach(e=>{ if(todayRec[e.id]==='P'||todayRec[e.id]==='H') present++; });
+  leaves.filter(l=>l.status==='Approved'&&l.from<=today&&l.to>=today).forEach(()=>onLeave++);
+  document.getElementById('dash-present').textContent=present;
+  document.getElementById('dash-leave').textContent=onLeave;
+
+  // Payroll
+  const now=new Date();
+  let totalNet=0;
+  active.forEach(e=>{ totalNet+=calcPayroll(e,now.getMonth()+1,now.getFullYear()).net; });
+  document.getElementById('dash-payroll').textContent='₹'+Math.round(totalNet).toLocaleString();
+
+  // Dept chart
+  const depts={};
+  employees.forEach(e=>{ depts[e.dept]=(depts[e.dept]||0)+1; });
+  const maxD=Math.max(...Object.values(depts),1);
+  const colors=['var(--ember)','var(--gold)','var(--green)','var(--glow)','#c39ad3','#ff9999'];
+  document.getElementById('deptChart').innerHTML=Object.entries(depts).map(([d,c],i)=>`
+    <div class="chart-bar-row">
+      <div class="chart-bar-label">${d}</div>
+      <div class="chart-bar-bg">
+        <div class="chart-bar-fill" style="width:${Math.round(c/maxD*100)}%;background:${colors[i%colors.length]};color:#000">${c}</div>
+      </div>
+      <div class="chart-bar-val">${c}</div>
+    </div>`).join('')||'<p class="text-muted">No employee data</p>';
+
+  // Attendance summary
+  const total=active.length;
+  const pct=total?Math.round(present/total*100):0;
+  document.getElementById('attSummary').innerHTML=`
+    <div class="flex-between"><span>Present</span><span class="text-green font-orbitron">${present}</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--green)"></div></div>
+    <div class="flex-between" style="margin-top:8px"><span>On Leave</span><span class="text-gold font-orbitron">${onLeave}</span></div>
+    <div class="flex-between mt-8"><span class="text-muted" style="font-size:12px">Attendance Rate</span><span class="font-orbitron" style="color:var(--glow)">${pct}%</span></div>`;
+
+  // Recent employees table
+  const tbody=document.getElementById('dashEmpTable').querySelector('tbody');
+  const recent=employees.slice(-5).reverse();
+  if(!recent.length) tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">No employees yet</td></tr>';
+  else tbody.innerHTML=recent.map(e=>`
+    <tr>
+      <td><strong>${e.name}</strong><br><span style="font-size:11px;color:var(--glow)">${e.id}</span></td>
+      <td>${e.dept}</td><td>${e.designation||'-'}</td><td>${e.joining||'-'}</td>
+      <td><span class="badge badge-${e.status==='Active'?'green':'red'}">${e.status}</span></td>
+    </tr>`).join('');
+}
+
+// ============================================================
+// MODAL POPULATION
+// ============================================================
+function populateModals(id){
+  if(id==='leaveModal'||id==='perfModal'){
+    const sel=id==='leaveModal'?document.getElementById('leaveEmp'):document.getElementById('perfEmp');
+    if(sel) sel.innerHTML=employees.map(e=>`<option value="${e.id}">${e.name} (${e.id})</option>`).join('')||'<option>No employees</option>';
+  }
+  if(id==='candidateModal'){
+    const sel=document.getElementById('candJob');
+    if(sel) sel.innerHTML=jobs.filter(j=>j.status==='Open').map(j=>`<option value="${j.id}">${j.title} - ${j.dept}</option>`).join('')||'<option value="">No open jobs</option>';
+  }
+}
+
+// ============================================================
+// REPORTS
+// ============================================================
+function reportEmployees(){
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>Employee Report - HR Software</title>
+  <style>body{font-family:Arial,sans-serif;padding:20px}h2{margin-bottom:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px;text-align:left}th{background:#f5f5f5}</style></head>
+  <body><h2>Employee Report - ${new Date().toLocaleDateString()}</h2>
+  <table><thead><tr><th>Emp ID</th><th>Name</th><th>Department</th><th>Designation</th><th>Mobile</th><th>Basic Salary</th><th>Joining</th><th>Status</th></tr></thead>
+  <tbody>${employees.map(e=>`<tr><td>${e.id}</td><td>${e.name}</td><td>${e.dept}</td><td>${e.designation||'-'}</td><td>${e.mobile||'-'}</td><td>₹${(e.salary||0).toLocaleString()}</td><td>${e.joining||'-'}</td><td>${e.status}</td></tr>`).join('')}</tbody>
+  </table></body></html>`);
+  w.print();
+}
+
+function reportPayroll(){
+  const now=new Date(); const m=now.getMonth()+1; const y=now.getFullYear();
+  const rows=employees.filter(e=>e.status==='Active').map(e=>{ const p=calcPayroll(e,m,y); return {...e,...p}; });
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>Payroll Report</title>
+  <style>body{font-family:Arial,sans-serif;padding:20px}h2{margin-bottom:20px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border:1px solid #ddd;padding:6px;text-align:left}th{background:#f5f5f5}</style></head>
+  <body><h2>Payroll - ${now.toLocaleString('default',{month:'long'})} ${y}</h2>
+  <table><thead><tr><th>ID</th><th>Name</th><th>Dept</th><th>Days</th><th>Earned</th><th>DA</th><th>HRA</th><th>Gross</th><th>PF</th><th>ESIC</th><th>Net</th></tr></thead>
+  <tbody>${rows.map(r=>`<tr><td>${r.id}</td><td>${r.name}</td><td>${r.dept}</td><td>${r.presentDays}</td><td>₹${r.earned.toLocaleString()}</td><td>₹${r.da.toLocaleString()}</td><td>₹${r.hra.toLocaleString()}</td><td>₹${r.gross.toLocaleString()}</td><td>₹${r.pf.toLocaleString()}</td><td>₹${r.esic.toLocaleString()}</td><td><strong>₹${r.net.toLocaleString()}</strong></td></tr>`).join('')}
+  </tbody></table></body></html>`);
+  w.print();
+}
+
+function reportAttendance(){
+  const today=new Date().toISOString().split('T')[0];
+  const rec=attendance[today]||{};
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>Attendance Report</title>
+  <style>body{font-family:Arial,sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px}th{background:#f5f5f5}</style></head>
+  <body><h2>Attendance Report - ${today}</h2>
+  <table><thead><tr><th>Emp ID</th><th>Name</th><th>Department</th><th>Status</th></tr></thead>
+  <tbody>${employees.map(e=>`<tr><td>${e.id}</td><td>${e.name}</td><td>${e.dept}</td><td>${rec[e.id]==='P'?'Present':rec[e.id]==='A'?'Absent':rec[e.id]==='H'?'Half Day':'Not Marked'}</td></tr>`).join('')}</tbody>
+  </table></body></html>`);
+  w.print();
+}
+
+// ============================================================
+// EXPORT / IMPORT
+// ============================================================
+function exportData(){
+  const data={employees,attendance,leaves,jobs,candidates,trainings,performances,empCounter};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='HR_Software_Backup_'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();
+  showToast('✅ Data exported!','success');
+}
+
+function importData(){ document.getElementById('importFile').click(); }
+
+function handleImport(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(d.employees){ employees=d.employees; DB.set('employees',employees); }
+      if(d.attendance){ attendance=d.attendance; DB.set('attendance',attendance); }
+      if(d.leaves){ leaves=d.leaves; DB.set('leaves',leaves); }
+      if(d.jobs){ jobs=d.jobs; DB.set('jobs',jobs); }
+      if(d.candidates){ candidates=d.candidates; DB.set('candidates',candidates); }
+      if(d.trainings){ trainings=d.trainings; DB.set('trainings',trainings); }
+      if(d.performances){ performances=d.performances; DB.set('performances',performances); }
+      if(d.empCounter){ empCounter=d.empCounter; DB.set('empCounter',empCounter); }
+      showSection('dashboard');
+      showToast('✅ Data imported successfully!','success');
+    }catch(err){ showToast('❌ Invalid backup file','error'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init(){
+  // Set today's date in topbar
+  const now=new Date();
+  document.getElementById('todayDate').textContent=now.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  // Set attendance date to today
+  const attDateEl=document.getElementById('attDate');
+  if(attDateEl) attDateEl.value=now.toISOString().split('T')[0];
+  // Render dashboard
+  renderDashboard();
+  updateBadge();
+}
+
+init();
+</script>
+</body>
+</html>
