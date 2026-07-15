@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Competitive Analysis System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1114;
+    --panel:#161C22;
+    --panel-alt:#1D252C;
+    --border:#2A343C;
+    --border-soft:#232B32;
+    --text:#E9E6DD;
+    --text-dim:#8E9BA6;
+    --text-faint:#5C6870;
+    --accent:#C89B4A;
+    --accent-soft:rgba(200,155,74,0.14);
+    --ok:#4FB3A9;
+    --danger:#E0563A;
+    --radius:4px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+
+  .shell{max-width:760px;margin:0 auto;padding:48px 24px 100px;}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:36px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand svg{width:20px;height:20px;color:var(--accent);}
+  .brand span{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;}
+  .status-pill{display:flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-faint);}
+  .status-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--text-faint);}
+  .status-pill.ready .dot{background:var(--ok);}
+  .status-pill.ready{color:var(--ok);border-color:var(--ok);}
+
+  /* stepper */
+  .stepper{display:flex;align-items:center;margin-bottom:44px;}
+  .step{display:flex;align-items:center;gap:10px;flex:1;position:relative;}
+  .step-circle{
+    width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;
+    font-size:12px;color:var(--text-faint);background:var(--panel);flex-shrink:0;transition:all .2s;z-index:1;
+  }
+  .step-label{font-size:12px;color:var(--text-faint);white-space:nowrap;transition:color .2s;}
+  .step-line{position:absolute;top:15px;left:30px;right:-100%;height:1px;background:var(--border);z-index:0;}
+  .step:last-child .step-line{display:none;}
+  .step.active .step-circle{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+  .step.active .step-label{color:var(--text);}
+  .step.done .step-circle{border-color:var(--ok);background:var(--ok);color:#0D1114;}
+  .step.done .step-line{background:var(--ok);}
+
+  @media (max-width:640px){ .step-label{display:none;} }
+
+  /* card */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:32px;}
+  .card-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:10px;}
+  .card h2{font-size:24px;margin-bottom:8px;}
+  .card p.sub{color:var(--text-dim);font-size:14px;margin-bottom:26px;max-width:520px;}
+
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--text-faint);text-transform:uppercase;margin-bottom:7px;}
+  input[type=text], textarea, select{
+    width:100%;background:var(--panel-alt);border:1px solid var(--border);color:var(--text);
+    padding:11px 13px;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:14px;resize:vertical;
+  }
+  input[type=text]:focus, textarea:focus, select:focus{outline:none;border-color:var(--accent);}
+  textarea{min-height:70px;}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:560px){.grid-2{grid-template-columns:1fr;}}
+
+  .obj-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media (max-width:560px){.obj-grid{grid-template-columns:1fr;}}
+  .obj-card{text-align:left;background:var(--panel-alt);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;color:var(--text);font-family:inherit;}
+  .obj-card:hover{border-color:var(--text-faint);}
+  .obj-card.selected{border-color:var(--accent);background:var(--accent-soft);}
+  .obj-card .t{font-size:13.5px;font-weight:600;}
+  .obj-card .d{font-size:12px;color:var(--text-dim);margin-top:4px;}
+
+  /* competitor list */
+  .comp-row{display:flex;gap:10px;margin-bottom:12px;align-items:flex-start;}
+  .comp-row input{flex:1;}
+  .comp-row textarea{flex:2;min-height:44px;}
+  .icon-btn{
+    background:var(--panel-alt);border:1px solid var(--border);border-radius:var(--radius);
+    width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-faint);
+  }
+  .icon-btn:hover{color:var(--danger);border-color:var(--danger);}
+  .icon-btn svg{width:16px;height:16px;}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#14100A;border:none;border-radius:var(--radius);padding:11px 18px;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:600;letter-spacing:.03em;cursor:pointer;}
+  .btn:hover{opacity:.88;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .btn svg{width:14px;height:14px;}
+  .btn.ghost{background:transparent;color:var(--text-dim);border:1px solid var(--border);}
+  .btn.ghost:hover{color:var(--text);border-color:var(--text-faint);opacity:1;}
+  .btn.dashed{background:transparent;border:1px dashed var(--border);color:var(--text-dim);width:100%;justify-content:center;padding:12px;}
+  .btn.dashed:hover{border-color:var(--accent);color:var(--accent);}
+
+  .nav-row{display:flex;justify-content:space-between;margin-top:28px;}
+
+  /* loading */
+  .loading-box{display:none;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;}
+  .loading-box.show{display:flex;}
+  .spinner{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:18px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-box .l1{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-faint);letter-spacing:.06em;}
+  .loading-box .l2{font-size:13px;color:var(--text-dim);margin-top:6px;}
+
+  .error-box{display:none;border:1px solid var(--danger);background:rgba(224,86,58,0.1);border-radius:var(--radius);padding:16px 18px;margin-top:16px;font-size:13.5px;color:#F0A796;}
+  .error-box.show{display:block;}
+  .error-box b{color:var(--danger);}
+
+  .api-note{margin-top:20px;font-size:11.5px;color:var(--text-faint);font-family:'JetBrains Mono',monospace;line-height:1.6;border-top:1px solid var(--border-soft);padding-top:14px;}
+
+  /* report view */
+  .report-view{display:none;}
+  .report-view.show{display:block;}
+  .setup-view.hide{display:none;}
+  .report-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:10px;}
+  .report-toolbar .tools{display:flex;gap:8px;}
+  .report-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:44px;}
+  .report-header{border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:24px;}
+  .report-header .tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+  .report-header h1{font-size:28px;}
+  .report-header .meta{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-faint);margin-top:10px;}
+  .report-body h2{font-size:19px;margin-top:30px;margin-bottom:10px;color:var(--text);}
+  .report-body h3{font-size:15.5px;margin-top:20px;margin-bottom:6px;color:var(--accent);font-family:'Inter',sans-serif;font-weight:600;}
+  .report-body p{color:#D6D2C6;font-size:14.5px;margin:0 0 12px;}
+  .report-body ul{margin:0 0 14px;padding-left:20px;color:#D6D2C6;font-size:14.5px;}
+  .report-body li{margin-bottom:5px;}
+  .report-body strong{color:var(--text);}
+
+  @media print{
+    .top,.stepper,.report-toolbar,.api-note,.btn{display:none !important;}
+    body{background:#fff;color:#111;}
+    .report-card{border:none;padding:0;}
+    .report-body p, .report-body ul{color:#222;}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="top">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V9M12 19V4M20 19v-6"/></svg>
+      <span>Competitive Analysis System</span>
+    </div>
+    <div class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">Awaiting Input</span></div>
+  </div>
+
+  <div id="setupView" class="setup-view">
+    <div class="stepper" id="stepper"></div>
+
+    <!-- STEP 1 -->
+    <div class="card step-panel" data-step="1">
+      <div class="card-eyebrow">Step 01</div>
+      <h2>Your company</h2>
+      <p class="sub">The system uses this to frame the analysis from your side of the market.</p>
+      <div class="field"><label>Company / product name</label><input type="text" id="companyName" placeholder="e.g. Northwind Analytics"></div>
+      <div class="field"><label>What it does, in one or two lines</label><textarea id="companyDesc" placeholder="e.g. Self-serve analytics dashboard for e-commerce brands under 50 employees"></textarea></div>
+      <div class="nav-row"><span></span><button class="btn" id="next1">Continue<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="card step-panel" data-step="2" style="display:none;">
+      <div class="card-eyebrow">Step 02</div>
+      <h2>What's the objective?</h2>
+      <p class="sub">This decides what the generated report focuses on and recommends.</p>
+      <div class="obj-grid" id="objGrid"></div>
+      <div class="nav-row">
+        <button class="btn ghost" id="back2">Back</button>
+        <button class="btn" id="next2">Continue<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="card step-panel" data-step="3" style="display:none;">
+      <div class="card-eyebrow">Step 03</div>
+      <h2>Who are you up against?</h2>
+      <p class="sub">Add each competitor and whatever you already know — pricing, positioning, reviews. The system fills gaps, it doesn't invent facts you haven't given it.</p>
+      <div id="compList"></div>
+      <button class="btn dashed" id="addCompBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add competitor</button>
+      <div class="nav-row">
+        <button class="btn ghost" id="back3">Back</button>
+        <button class="btn" id="next3">Continue<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="card step-panel" data-step="4" style="display:none;">
+      <div class="card-eyebrow">Step 04</div>
+      <h2>Review and generate</h2>
+      <p class="sub">The system sends your inputs to Claude and writes a structured competitive analysis report.</p>
+      <div id="reviewSummary" class="mono" style="font-size:12.5px;color:var(--text-dim);line-height:1.9;"></div>
+      <div class="nav-row">
+        <button class="btn ghost" id="back4">Back</button>
+        <button class="btn" id="generateBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4.5 12.5H11L10 22l9.5-11.5H13z"/></svg>Generate analysis</button>
+      </div>
+      <div class="loading-box" id="loadingBox">
+        <div class="spinner"></div>
+        <div class="l1">ANALYZING</div>
+        <div class="l2" id="loadingMsg">Reading competitor inputs…</div>
+      </div>
+      <div class="error-box" id="errorBox"></div>
+      <div class="api-note">This calls the Anthropic API directly from the browser. It runs inside Claude's own preview environment. If you deploy this file outside Claude, route this fetch through your own backend that holds the API key — a static HTML file cannot store one safely.</div>
+    </div>
+  </div>
+
+  <!-- REPORT VIEW -->
+  <div class="report-view" id="reportView">
+    <div class="report-toolbar">
+      <button class="btn ghost" id="editBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3zM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>Edit inputs</button>
+      <div class="tools">
+        <button class="btn ghost" id="regenBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4v6h6M20 20v-6h-6M4.5 15a8 8 0 0013.9 3M19.5 9a8 8 0 00-13.9-3"/></svg>Regenerate</button>
+        <button class="btn" id="printBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V3h12v6M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2M6 14h12v7H6z"/></svg>Print / Save PDF</button>
+      </div>
+    </div>
+    <div class="report-card">
+      <div class="report-header">
+        <div class="tag">Competitive Analysis Report</div>
+        <h1 id="reportTitle">—</h1>
+        <div class="meta" id="reportMeta"></div>
+      </div>
+      <div class="report-body" id="reportBody"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var state = { company:'', companyDesc:'', objective:null, objectiveLabel:'', competitors:[] };
+  var currentStep = 1;
+  var trashIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a1 1 0 01-1 1H7a1 1 0 01-1-1V6h12z"/></svg>';
+
+  var steps = [
+    {n:1,label:'Setup'}, {n:2,label:'Objective'}, {n:3,label:'Competitors'}, {n:4,label:'Generate'}
+  ];
+  var objectives = [
+    {key:'pricing',label:'Pricing Decision',desc:'What to charge or how to package.'},
+    {key:'gap',label:'Product Gap',desc:'What to build next.'},
+    {key:'entry',label:'Market Entry',desc:'Whether to enter a market.'},
+    {key:'pitch',label:'Investor Pitch',desc:'The competitive slide for a raise.'},
+    {key:'positioning',label:'Positioning',desc:'Sharpen your own message.'},
+    {key:'other',label:'General / Exploratory',desc:'No single decision yet.'}
+  ];
+
+  function el(html){ var d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
+  function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+
+  function renderStepper(){
+    var wrap = document.getElementById('stepper');
+    wrap.innerHTML = '';
+    steps.forEach(function(s){
+      var cls = 'step' + (s.n===currentStep ? ' active' : '') + (s.n<currentStep ? ' done' : '');
+      var circle = s.n<currentStep ? '✓' : s.n;
+      var node = el('<div class="'+cls+'"><div class="step-circle">'+circle+'</div><div class="step-label">'+s.label+'</div><div class="step-line"></div></div>');
+      wrap.appendChild(node);
+    });
+  }
+
+  function showStep(n){
+    currentStep = n;
+    document.querySelectorAll('.step-panel').forEach(function(p){
+      p.style.display = (parseInt(p.getAttribute('data-step'),10)===n) ? 'block' : 'none';
+    });
+    renderStepper();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function renderObjectives(){
+    var grid = document.getElementById('objGrid');
+    grid.innerHTML = '';
+    objectives.forEach(function(o){
+      var card = el('<button class="obj-card" data-key="'+o.key+'"><div class="t">'+o.label+'</div><div class="d">'+o.desc+'</div></button>');
+      card.addEventListener('click', function(){
+        state.objective = o.key; state.objectiveLabel = o.label;
+        document.querySelectorAll('.obj-card').forEach(function(c){ c.classList.toggle('selected', c===card); });
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  function addCompRow(name, info){
+    var list = document.getElementById('compList');
+    var row = el('<div class="comp-row"><input type="text" placeholder="Competitor name" value="'+escapeHtml(name||'')+'"><textarea placeholder="Known info: pricing, positioning, reviews, funding…">'+escapeHtml(info||'')+'</textarea><button class="icon-btn" title="Remove">'+trashIcon+'</button></div>');
+    row.querySelector('.icon-btn').addEventListener('click', function(){ row.remove(); });
+    list.appendChild(row);
+  }
+
+  function collectCompetitors(){
+    var rows = document.querySelectorAll('#compList .comp-row');
+    var out = [];
+    rows.forEach(function(r){
+      var name = r.querySelector('input').value.trim();
+      var info = r.querySelector('textarea').value.trim();
+      if(name) out.push({name:name, info:info});
+    });
+    return out;
+  }
+
+  function renderReview(){
+    state.competitors = collectCompetitors();
+    var box = document.getElementById('reviewSummary');
+    var lines = [];
+    lines.push('COMPANY&nbsp;&nbsp; ' + (state.company || '—'));
+    lines.push('OBJECTIVE&nbsp; ' + (state.objectiveLabel || '—'));
+    lines.push('COMPETITORS');
+    if(state.competitors.length===0){ lines.push('&nbsp;&nbsp;none added'); }
+    state.competitors.forEach(function(c){ lines.push('&nbsp;&nbsp;· ' + escapeHtml(c.name)); });
+    box.innerHTML = lines.join('<br>');
+  }
+
+  function setStatus(ready){
+    var pill = document.getElementById('statusPill');
+    pill.classList.toggle('ready', ready);
+    document.getElementById('statusText').textContent = ready ? 'Ready to generate' : 'Awaiting Input';
+  }
+
+  // ---------- simple markdown-ish renderer ----------
+  function renderMarkdown(md){
+    var lines = md.split('\n');
+    var html = '';
+    var inList = false;
+    lines.forEach(function(line){
+      line = line.trim();
+      if(line === ''){ if(inList){ html += '</ul>'; inList=false; } return; }
+      var h2 = line.match(/^##\s+(.*)/);
+      var h3 = line.match(/^###\s+(.*)/);
+      var li = line.match(/^[-*]\s+(.*)/);
+      if(h2){
+        if(inList){ html += '</ul>'; inList=false; }
+        html += '<h2>' + inline(h2[1]) + '</h2>';
+      } else if(h3){
+        if(inList){ html += '</ul>'; inList=false; }
+        html += '<h3>' + inline(h3[1]) + '</h3>';
+      } else if(li){
+        if(!inList){ html += '<ul>'; inList=true; }
+        html += '<li>' + inline(li[1]) + '</li>';
+      } else {
+        if(inList){ html += '</ul>'; inList=false; }
+        html += '<p>' + inline(line) + '</p>';
+      }
+    });
+    if(inList) html += '</ul>';
+    return html;
+  }
+  function inline(t){
+    return escapeHtml(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  }
+
+  function buildPrompt(){
+    var lines = [];
+    lines.push('You are a senior competitive strategy analyst. Write a competitive analysis report.');
+    lines.push('');
+    lines.push('Company: ' + state.company);
+    lines.push('Company description: ' + state.companyDesc);
+    lines.push('Objective of this analysis: ' + state.objectiveLabel);
+    lines.push('');
+    lines.push('Competitors and known information:');
+    state.competitors.forEach(function(c){
+      lines.push('- ' + c.name + ': ' + (c.info || 'no additional info provided, use general knowledge if you have it, otherwise note the gap'));
+    });
+    lines.push('');
+    lines.push('Write the report using this structure, with ## for section headers and ### for sub-headers, and - for bullet points. Do not use any other markdown. Keep it sharp and decision-useful, not generic:');
+    lines.push('## Executive Summary');
+    lines.push('## Market Landscape');
+    lines.push('## Competitor Breakdown (a ### sub-header per competitor, with strengths, weaknesses, and the one thing they do better than ' + (state.company||'this company') + ')');
+    lines.push('## Where the Gap Is');
+    lines.push('## Recommendation (specific to the stated objective: ' + state.objectiveLabel + ')');
+    lines.push('');
+    lines.push('Be direct. Call out weak inputs where the competitor info given is thin, rather than inventing specifics.');
+    return lines.join('\n');
+  }
+
+  function generateReport(){
+    var errorBox = document.getElementById('errorBox');
+    var loadingBox = document.getElementById('loadingBox');
+    var loadingMsg = document.getElementById('loadingMsg');
+    errorBox.classList.remove('show');
+    loadingBox.classList.add('show');
+    document.getElementById('generateBtn').disabled = true;
+
+    var msgs = ['Reading competitor inputs…','Mapping the landscape…','Drafting the recommendation…'];
+    var mi = 0;
+    var msgTimer = setInterval(function(){ mi=(mi+1)%msgs.length; loadingMsg.textContent = msgs[mi]; }, 1400);
+
+    fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: buildPrompt() }]
+      })
+    })
+    .then(function(res){
+      if(!res.ok){ throw new Error('API responded with status ' + res.status); }
+      return res.json();
+    })
+    .then(function(data){
+      clearInterval(msgTimer);
+      var text = (data.content || [])
+        .filter(function(b){ return b.type === 'text'; })
+        .map(function(b){ return b.text; })
+        .join('\n');
+      if(!text){ throw new Error('No text returned from the model.'); }
+      showReport(text);
+    })
+    .catch(function(err){
+      clearInterval(msgTimer);
+      loadingBox.classList.remove('show');
+      document.getElementById('generateBtn').disabled = false;
+      errorBox.classList.add('show');
+      errorBox.innerHTML = '<b>Generation failed.</b> ' + escapeHtml(err.message) + '. If this file is running outside Claude\'s preview, this is expected — wire the same request through your own backend instead.';
+    });
+  }
+
+  function showReport(text){
+    document.getElementById('loadingBox').classList.remove('show');
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('reportTitle').textContent = state.company ? (state.company + ' — Competitive Analysis') : 'Competitive Analysis';
+    document.getElementById('reportMeta').textContent = 'OBJECTIVE: ' + (state.objectiveLabel||'—').toUpperCase() + '   ·   ' + new Date().toDateString();
+    document.getElementById('reportBody').innerHTML = renderMarkdown(text);
+    document.getElementById('setupView').classList.add('hide');
+    document.getElementById('reportView').classList.add('show');
+  }
+
+  function init(){
+    renderStepper();
+    renderObjectives();
+    addCompRow('','');
+
+    document.getElementById('next1').addEventListener('click', function(){
+      state.company = document.getElementById('companyName').value.trim();
+      state.companyDesc = document.getElementById('companyDesc').value.trim();
+      showStep(2);
+    });
+    document.getElementById('back2').addEventListener('click', function(){ showStep(1); });
+    document.getElementById('next2').addEventListener('click', function(){ showStep(3); });
+    document.getElementById('back3').addEventListener('click', function(){ showStep(2); });
+    document.getElementById('addCompBtn').addEventListener('click', function(){ addCompRow('',''); });
+    document.getElementById('next3').addEventListener('click', function(){ renderReview(); setStatus(true); showStep(4); });
+    document.getElementById('back4').addEventListener('click', function(){ showStep(3); });
+
+    document.getElementById('generateBtn').addEventListener('click', generateReport);
+    document.getElementById('regenBtn').addEventListener('click', function(){
+      document.getElementById('reportView').classList.remove('show');
+      document.getElementById('setupView').classList.remove('hide');
+      showStep(4);
+      generateReport();
+    });
+    document.getElementById('editBtn').addEventListener('click', function(){
+      document.getElementById('reportView').classList.remove('show');
+      document.getElementById('setupView').classList.remove('hide');
+      showStep(1);
+    });
+    document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
