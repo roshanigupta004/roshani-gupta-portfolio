@@ -210,7 +210,39 @@ footer{
     padding:25px;
     margin-top:80px;
 }
+/* ===== Premium Skills Cards ===== */
 
+.skills{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:25px;
+    margin-top:40px;
+}
+
+.skills > div{
+    background:#fff;
+    border-radius:15px;
+    padding:25px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    border-top:5px solid #2563eb;
+    transition:.3s;
+}
+
+.skills > div:hover{
+    transform:translateY(-8px);
+    box-shadow:0 15px 30px rgba(0,0,0,.15);
+}
+
+.skills h3{
+    color:#2563eb;
+    margin-bottom:15px;
+    font-size:24px;
+}
+
+.skills p{
+    color:#555;
+    line-height:1.8;
+}
 
 
 
