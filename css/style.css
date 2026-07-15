@@ -218,7 +218,48 @@ header{
     line-height:1.8;
     margin:0;
 }
+/* ===========================
+   PROJECTS
+=========================== */
 
+.projects{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:25px;
+    margin-top:40px;
+}
+
+.projects > div{
+    background:#fff;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    transition:.3s;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.projects > div:hover{
+    transform:translateY(-8px);
+    box-shadow:0 15px 30px rgba(0,0,0,.15);
+}
+
+.projects h2{
+    color:#2563eb;
+    font-size:24px;
+    margin-bottom:15px;
+}
+
+.projects p{
+    color:#555;
+    line-height:1.8;
+    margin-bottom:25px;
+}
+
+.projects .btn{
+    align-self:flex-start;
+}
 /* ===========================
    FOOTER
 =========================== */
