@@ -164,7 +164,52 @@ header{
 .skills p:hover{
     transform:translateY(-5px);
 }
+/* ===========================
+   Common Pages
+=========================== */
 
+.section{
+    width:90%;
+    max-width:1200px;
+    margin:60px auto;
+    padding:20px;
+}
+
+.section h1{
+    font-size:42px;
+    color:#2563eb;
+    margin-bottom:25px;
+}
+
+.section h2{
+    font-size:28px;
+    margin-top:35px;
+    margin-bottom:15px;
+    color:#0f172a;
+}
+
+.section p{
+    font-size:17px;
+    color:#555;
+    line-height:1.8;
+    margin-bottom:20px;
+}
+
+.section ul{
+    padding-left:25px;
+    margin-bottom:20px;
+}
+
+.section li{
+    margin-bottom:10px;
+}
+footer{
+    background:#0f172a;
+    color:white;
+    text-align:center;
+    padding:25px;
+    margin-top:80px;
+}
 
 
 
